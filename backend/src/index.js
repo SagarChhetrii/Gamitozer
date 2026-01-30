@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { ConnectDB } from "./db/index.js";
 import app from "./app.js";
-
+//Test
 dotenv.config({
     path: './.env'
 })
