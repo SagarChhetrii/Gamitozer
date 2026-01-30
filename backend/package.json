@@ -1,5 +1,24 @@
 {
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend for gamitozer",
+  "keywords": [
+    "Games"
+  ],
+  "license": "ISC",
+  "author": "Aparneet dey && Sagar Chhetri",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node -r dotenv/config --experimental-json-modules src/index.js",
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+  },
   "dependencies": {
-    "express": "^5.2.1"
+    "cookieparser": "^0.1.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.1.5",
+    "node": "^25.5.0",
+    "nodemon": "^3.1.11"
   }
 }
