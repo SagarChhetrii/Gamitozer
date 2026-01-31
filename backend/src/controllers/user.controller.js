@@ -158,9 +158,30 @@ const refreshAccessToken = asyncHandler( async (req, res) => {
     }
 })
 
+const resetPassword = asyncHandler( async (req, res) => {
+    const {newPassword} = req.body;
+
+    if(!newPassword) throw new ApiError(401, "New password is required");
+
+    const user = await User.findById(req.user._id);
+
+    user.password = newPassword;
+    await user.save({validateBeforeSave: false});
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            "Password reset successful"
+        )
+    )
+})
+
 export {
     userRegister,
     userLogin,
     userLogout,
-    refreshAccessToken
+    refreshAccessToken,
+    resetPassword
 }
