@@ -205,7 +205,6 @@ const getCurrentUser = asyncHandler( async (req, res) => {
 
 const updateUserAvatar = asyncHandler( async (req, res) => {
     const avatarLocalPath = req.file?.path;
-    console.log(req.file?.path)
 
     if(!avatarLocalPath) throw new ApiError(401, "New avatar is required") 
 
@@ -237,6 +236,32 @@ const updateUserAvatar = asyncHandler( async (req, res) => {
     )
 })
 
+const updateUserDetail = asyncHandler( async (req ,res) => {
+    const {fullname} = req.body;
+
+    if(!fullname) throw new ApiError(400, "New fullname is required");
+
+    const user = await User.findByIdAndUpdate(req.user?._id, {
+        $set: {
+            fullname
+        }
+    }, {
+        new: true
+    }).select("-password -refreshToken")
+
+    if(!user) throw new ApiError(401, "User not found");
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            user,
+            "User detail updated successfully"
+        )
+    )
+})
+
 export {
     userRegister,
     userLogin,
@@ -244,5 +269,6 @@ export {
     refreshAccessToken,
     resetPassword,
     getCurrentUser,
-    updateUserAvatar
+    updateUserAvatar,
+    updateUserDetail
 }
