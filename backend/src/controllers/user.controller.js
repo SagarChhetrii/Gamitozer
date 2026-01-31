@@ -18,13 +18,13 @@ const generateTokens = async (userId) => {
         
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
-        console.log(accessToken);
 
         user.refreshToken = refreshToken;
         await user.save({validateBeforeSave: false});
 
         return {accessToken, refreshToken}
     } catch (error) {
+        console.log(error);
         throw new ApiError(500, "Something went wrong while generating token");
     }
 }
