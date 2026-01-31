@@ -31,6 +31,7 @@ const userSchema = new Schema(
         },
         avatar: {
             type: String, //Cloudinary link
+            required: true
         },
         role: {
             type: String,

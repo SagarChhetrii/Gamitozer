@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken"
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const cookieOptions = {
     httpOnly: true,
@@ -35,7 +36,7 @@ const generateTokens = async (userId) => {
 const userRegister = asyncHandler( async (req, res) => {
     const {username, email, fullname, password} = req.body;
 
-    if(!username || !email || !fullname || !password) throw new ApiError(404, "All fields are required");
+    if(!username || !email || !fullname || !password) throw new ApiError(400, "All fields are required");
 
     const existedUser = await User.findOne({
         $or: [{username}, {email}]
@@ -43,12 +44,20 @@ const userRegister = asyncHandler( async (req, res) => {
 
     if(existedUser) throw new ApiError(400, "User already exist");
 
+    const avatarLocalPath = req.file?.path;
+
+    if(!avatarLocalPath) throw new ApiError(400, "Avatar is required");
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if(!avatar) throw new ApiError(500, "Something went wrong while uploading file on cloudinary");
+
     const user = await User.create({
         username: username.toLowerCase(),
         email,
         fullname,
         password,
-        avatar: "",
+        avatar: avatar.secure_url,
         refreshToken: ""
     })
 
@@ -102,7 +111,7 @@ const userLogin = asyncHandler( async (req, res) => {
 })
 
 const userLogout = asyncHandler( async (req, res) => {
-    await User.findByIdAndUpdate(req.user._id, {
+    await User.findByIdAndUpdate(req.user?._id, {
         $set: {
             refreshToken: ""
         }
@@ -163,7 +172,7 @@ const resetPassword = asyncHandler( async (req, res) => {
 
     if(!newPassword) throw new ApiError(401, "New password is required");
 
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user?._id);
 
     user.password = newPassword;
     await user.save({validateBeforeSave: false});
@@ -178,10 +187,62 @@ const resetPassword = asyncHandler( async (req, res) => {
     )
 })
 
+const getCurrentUser = asyncHandler( async (req, res) => {
+    const currentUser = await User.findById(req.user?._id).select("-password -refreshToken");
+
+    if(!currentUser) throw new ApiError(401, "Token expired or used");
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            currentUser,
+            "User data fetched successfully"
+        )
+    )
+})
+
+const updateUserAvatar = asyncHandler( async (req, res) => {
+    const avatarLocalPath = req.file?.path;
+    console.log(req.file?.path)
+
+    if(!avatarLocalPath) throw new ApiError(401, "New avatar is required") 
+
+    const newAvatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if(!newAvatar) throw new ApiError(505, "Something went wrong while uploading file on cloudinary");
+
+    const user = await User.findById(req.user?._id).select("-password -refreshToken");
+    
+    const previousAvatar = user.avatar;
+
+    user.avatar = newAvatar.secure_url;
+    await user.save({validateBeforeSave: false});
+
+    const deleteResponse = await deleteFromCloudinary(previousAvatar);
+
+    if(!deleteResponse) console.log("Previous avatar is not deleted from cloudinary");
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            {
+                avatar: user.avatar 
+            },
+            "Avatar updated successfully"
+        )
+    )
+})
+
 export {
     userRegister,
     userLogin,
     userLogout,
     refreshAccessToken,
-    resetPassword
+    resetPassword,
+    getCurrentUser,
+    updateUserAvatar
 }
