@@ -6,7 +6,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="logo">
         <img src={logo} className="logo-icon" />
-        <span>Desktopia</span>
+        <span>Gamitozer</span>
       </div>
 
       <nav>
