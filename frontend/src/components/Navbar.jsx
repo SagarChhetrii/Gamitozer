@@ -8,7 +8,7 @@ export default function Navbar() {
         <img src={logo} className="logo-icon" />
         <span>Gamitozer</span>
       </div>
-
+      
       <nav>
         <ul>
           <li><Link to="/">Home</Link></li>
