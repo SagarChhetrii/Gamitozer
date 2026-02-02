@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import a from "../assets/a.png";
@@ -11,6 +12,11 @@ import h from "../assets/h.png";
 import i from "../assets/i.png";
 
 export default function Home() {
+  
+  useEffect(() => {
+    document.body.className = "";   // resets body class
+  }, []);
+
   return (
     <main className="homepage-hero">
       <div className="hero-content">
