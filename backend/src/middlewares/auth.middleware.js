@@ -26,4 +26,9 @@ const verifyToken = asyncHandler( async (req, _, next) => {
     }
 })
 
-export {verifyToken}
+const verifyAdmin = asyncHandler( async (req, _, next) => {
+    if(req.user?.role !== "admin") throw new ApiError(401, "Unauthorized Admin Request");
+    next();
+})
+
+export {verifyToken, verifyAdmin}
