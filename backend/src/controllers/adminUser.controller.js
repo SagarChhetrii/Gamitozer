@@ -29,6 +29,56 @@ const changeUserRole = asyncHandler( async ( req, res) => {
     )
 })
 
+const getUsersDashboard = asyncHandler( async ( req, res) => {
+    const {page = 1, limit = 10, name, role} = req.query;
+    const pipeline = [{
+        $project: {
+            password: 0,
+            refreshToken: 0
+        }
+    }];
+
+    if(name) {
+        pipeline.push({
+            $match: {
+                fullname: {
+                    $regex: name,
+                    $options: "i"
+                }
+            }
+        })
+    }
+
+    if(role) {
+        pipeline.push({
+            $match: {
+                role
+            }
+        })
+    }
+
+    const paginateOptions = {
+        page,
+        limit,
+        customLabels: {
+            docs: "users"
+        }
+    }
+
+    const users = await User.aggregatePaginate(User.aggregate(pipeline), paginateOptions);
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            users,
+            "Users fetched successfully"
+        )
+    )
+})
+
 export {
-    changeUserRole
+    changeUserRole,
+    getUsersDashboard
 }
