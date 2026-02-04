@@ -30,8 +30,8 @@ const gameSchema = new Schema(
         },
         visibility: {
             type: String,
-            enum: ["Public", "Private"],
-            default: "Public"
+            enum: ["public", "private"],
+            default: "public"
         },
         tags: [
             {

@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Game } from "../models/game.model.js";
+import {uploadOnCloudinary} from "../utils/cloudinary.js";
 
 const getAllGames = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, searchQuery, tags, sortBy, sortType } = req.query;
@@ -9,7 +10,7 @@ const getAllGames = asyncHandler(async (req, res) => {
     const pipeline = [
         {
             $match: {
-                visibility: "Public"
+                visibility: "public"
             }
         },
         {
@@ -90,7 +91,52 @@ const getAllGames = asyncHandler(async (req, res) => {
         )
 })
 
+const publishAGame = asyncHandler( async (req, res) => {
+    const {title, description, link, visibility = "public", tags} = req.body;
+
+    if(!title.trim() || !link.trim()) throw new ApiError(400, "Required fields are needed");
+    let tagsArray = []
+    if(tags) {
+        tagsArray = tags.split(",");
+    }
+
+    const bannerLocalPath = req.files?.bannerFile[0].path;
+    const videoLocalPath = req.files?.videoFile?.[0]?.path ?? "";
+
+    if(!bannerLocalPath) throw new ApiError(400, "Banner is required");
+
+    const banner = await uploadOnCloudinary(bannerLocalPath);
+    let video = "";
+    if(videoLocalPath) {
+        video = await uploadOnCloudinary(videoLocalPath);
+    }
+
+    const uploadedGame = await Game.create({
+        title,
+        description,
+        link,
+        visibility,
+        tags: tagsArray,
+        owner: req.user?._id,
+        banner: banner?.secure_url,
+        video: video ? video.secure_url : ""
+    });
+
+    if(!uploadedGame) throw new ApiError(500, "Something went wrong while creating game in DB");
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            uploadedGame,
+            "Game published successfully"
+        )
+    )
+})
+
 
 export {
-    getAllGames
+    getAllGames,
+    publishAGame
 }
