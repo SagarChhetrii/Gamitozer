@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"
+import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const userSchema = new Schema(
     {
@@ -21,9 +23,7 @@ const userSchema = new Schema(
         password: {
             type: String,
             required: [true, "Password is required"],
-            unique: true,
-            trim: true,
-            lowercase: true
+            trim: true
         },
         fullname: {
             type: String,
@@ -32,6 +32,7 @@ const userSchema = new Schema(
         },
         avatar: {
             type: String, //Cloudinary link
+            required: true
         },
         role: {
             type: String,
@@ -48,15 +49,17 @@ const userSchema = new Schema(
     }
 );
 
-userSchema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+userSchema.plugin(aggregatePaginate);
 
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+    
+    
     this.password = await bcrypt.hash(this.password, 10);
-    next();
 })
 
-userSchema.methods.isPasswordCorrectasync =  async function (password) {
-    return await bcrypt.compare(password, this.password);
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password.trim(), this.password);
 }
 
 userSchema.methods.generateAccessToken = function () {

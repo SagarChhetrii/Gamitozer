@@ -1,0 +1,655 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-cream: #f8f5ed;
+  --color-orange: orange;
+  --color-dark-orange: rgb(247, 180, 57); /* Slightly darker for button hover */
+  --color-navy: #2a3d4f;
+  --color-yellow: #f7d046;
+  --color-red-accent: #e76f51; /* For game icon accents */
+  --navbar-height: 5rem;/* Approximate height of the navbar */
+} 
+
+/* Global Styles */
+body {
+  font-family: "Geist", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-cream);
+  color: var(--color-navy);
+  line-height: 1.6;
+  overflow-x: hidden; /* Prevent horizontal scroll from animations */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Geist", sans-serif;
+  color: var(--color-navy);
+  margin-top: 0;
+  
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-navy);
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  background-color: var(--color-cream);
+  position: fixed;
+  width: 90%;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  font-family: "Geist", sans-serif;
+  color: var(--color-navy);
+}
+
+.navbar .logo-icon {
+  width: 100px;
+  height: 70px;
+  margin-right: -20px;
+  animation: float 3s ease-in-out infinite alternate;
+}
+
+.navbar nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 2rem;
+}
+
+.navbar nav ul li a {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.navbar nav ul li a:hover,
+.navbar nav ul li a.active {
+  color: var(--color-orange);
+}
+
+.navbar nav ul li a::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 3px;
+  background-color: var(--color-orange);
+  bottom: 0;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.navbar nav ul li a:hover::after,
+.navbar nav ul li a.active::after {
+  width: 100%;
+}
+
+/* Homepage Hero Section */
+.homepage-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  align-items: center;
+  text-align: center;
+  padding: calc(var(--navbar-height) + 2rem) 5% 2rem; /* Dynamic top padding */
+  min-height: calc(100vh - var(--navbar-height)); /* Ensure it fits viewport minus navbar */
+  box-sizing: border-box; /* Include padding in height calculation */
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content {
+  max-width: 800px;
+  z-index: 10;
+}
+
+.homepage-hero h1 {
+  font-size: 4.5rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.homepage-hero .tagline {
+  font-size: 1.3rem;
+  margin-bottom: 2.5rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.button {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background-color: var(--color-orange);
+  color: white;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: var(--color-dark-orange);
+  transform: translateY(-3px);
+}
+
+.view-games-button:active {
+  animation: button-bounce 0.6s ease-out;
+}
+
+/* Illustrations on Homepage */
+.illustrations {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none; /* Allow clicks through illustrations */
+}
+
+.illustration {
+  position: absolute;
+  animation: float 3s ease-in-out infinite alternate;
+  width: clamp(150px, 20vw, 280px); /* Responsive width for illustrations */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.dots-boxes {
+  bottom: 15%;
+  left: 10%;
+  animation-delay: 0.5s;
+}
+
+.hangman {
+  bottom: 25%;
+  right: 15%;
+  animation-delay: 0.2s;
+}
+
+.tic-tac-toe {
+  bottom: 10%;
+  right: 5%;
+  animation-delay: 0.8s;
+}
+
+.pencil {
+  width: clamp(200px, 25vw, 300px); /* Responsive width for pencil */
+  bottom: 5%;
+  right: 10%;
+  transform-origin: bottom left;
+  animation: pencil-move 4s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+/* Doodle Elements */
+.doodle {
+  position: absolute;
+  animation: float 4s ease-in-out infinite alternate;
+  opacity: 0.7;
+  width: clamp(30px, 5vw, 80px); /* Responsive width for doodles */
+  height: auto;
+}
+
+.doodle-heart {
+  width: 50px;
+  top: 25%;
+  right: 10%;
+  animation-delay: 1s;
+}
+
+.doodle-squiggle {
+  width: 80px;
+  top: 50%;
+  left: 8%;
+  animation-delay: 0.3s;
+}
+
+.doodle-star-1 {
+  width: 30px;
+  bottom: 5%;
+  left: 20%;
+  animation-delay: 1.5s;
+}
+
+.doodle-star-2 {
+  width: 40px;
+  bottom: 20%;
+  right: 3%;
+  animation-delay: 0.7s;
+}
+
+.doodle-flower {
+  width: 60px;
+  bottom: 10%;
+  left: 5%;
+  animation-delay: 0.9s;
+}
+
+/* Games Page Specific Styles */
+.games-page-body {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+.games-page-body .navbar {
+  background-color: var(--color-orange);
+  box-shadow: none;
+}
+
+.games-page-body .navbar .logo,
+.games-page-body .navbar nav ul li a {
+  color: white;
+}
+
+.games-page-body .navbar nav ul li a:hover,
+.games-page-body .navbar nav ul li a.active {
+  color: var(--color-cream);
+}
+
+.games-page-body .navbar nav ul li a::after {
+  background-color: var(--color-cream);
+}
+
+.games-section {
+  text-align: center;
+  padding: 10rem 5% 5rem; /* Adjust padding for fixed navbar */
+  min-height: 100vh;
+}
+
+.games-heading {
+  font-size: 4.5rem;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2); /* Adds a playful shadow */
+}
+
+.games-tagline {
+  font-size: 1.3rem;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.game-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.game-card {
+  background-color: var(--color-navy);
+  border-radius: 20px;
+  padding: 1.5rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden; /* For the icon's position */
+}
+
+.game-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  animation: card-bounce 0.6s ease-out;
+}
+
+.game-card-icon {
+  width: 100%;
+  height: 220px;
+  margin-top: 0;
+  object-fit: cover;
+  animation: float 3s ease-in-out infinite alternate; /* Apply float animation to icons */
+  position: absolute;
+}
+
+/* Compact image-only game cards (Dotify + Flappy Bird) */
+.image-only-card {
+  padding: 0;
+  align-items: stretch;
+  border-radius: 20px;
+}
+
+.image-only-card .game-card-media {
+  border-radius: 20px;
+}
+
+.image-only-card h2,
+.image-only-card p {
+  display: none;
+}
+
+/* Game card media hover blur + title overlay (Dotify + Flappy Bird) */
+.game-card-media {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  margin-top: 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.game-card-media .game-card-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.game-card-title-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1));
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hover-blur:hover .game-card-icon {
+  filter: blur(3px) brightness(0.7);
+  transform: scale(1.03);
+}
+
+.hover-blur:hover .game-card-title-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.game-card h2 {
+  font-size: 2rem;
+  color: var(--color-navy);
+  margin-bottom: 0.5rem;
+}
+
+.game-card p {
+  font-size: 1rem;
+  color: var(--color-navy);
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes pencil-move {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(10px, -10px) rotate(5deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes button-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-10px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+  80% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-bounce {
+  0%,
+  100% {
+    transform: translateY(-10px) scale(1.03);
+  }
+  20% {
+    transform: translateY(-15px) scale(1.05);
+  }
+  40% {
+    transform: translateY(-10px) scale(1.03);
+  }
+  60% {
+    transform: translateY(-12px) scale(1.04);
+  }
+  80% {
+    transform: translateY(-10px) scale(1.03);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .homepage-hero h1 {
+    font-size: 3.5rem;
+  }
+
+  .homepage-hero .tagline {
+    font-size: 1.1rem;
+  }
+
+  .illustrations img {
+    width: 200px; /* Adjust size for smaller screens */
+  }
+
+  .dots-boxes {
+    bottom: 10%;
+    left: 5%;
+  }
+
+  .hangman {
+    bottom: 20%;
+    right: 10%;
+  }
+
+  .tic-tac-toe {
+    bottom: 5%;
+    right: 0%;
+  }
+
+  .pencil {
+    width: 250px;
+    bottom: 0%;
+    right: 5%;
+  }
+
+  .doodle-heart {
+    top: 20%;
+    right: 5%;
+  }
+
+  .doodle-squiggle {
+    top: 45%;
+    left: 3%;
+  }
+}
+@media (max-width:350px) {
+  .navbar {
+    flex-direction: column;
+    padding: 1rem 2%;
+    position: static; /* Make navbar static on mobile */
+    width: auto;
+    box-shadow: none;
+    margin-bottom: -11rem;
+  }
+
+  .navbar nav ul {
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+  .homepage-hero h1 {
+    font-size: 2rem; /* Smaller font size for mobile */
+  }
+
+}
+@media (max-width:600px) {
+  .navbar {
+    flex-direction: column;
+    padding: 1rem 2%;
+    position: static; /* Make navbar static on mobile */
+    width: auto;
+    box-shadow: none;
+    margin-bottom: -11rem;
+  }
+
+  .navbar nav ul {
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+  .homepage-hero h1 {
+    font-size: 2rem; /* Smaller font size for mobile */
+  }
+
+}
+
+@media (max-width: 300px) {
+  
+
+  .homepage-hero {
+    padding-top: 2rem; /* Adjust padding for static navbar */
+    min-height: auto; /* Allow height to be determined by content */
+    justify-content: flex-start; /* Align content to top on mobile */
+  }
+
+  
+
+  .homepage-hero .tagline {
+    font-size: 1rem;
+    padding: 0 1rem;
+    margin-bottom: 1.5rem; /* Reduce margin */
+  }
+
+  .illustrations {
+    position: relative; /* Make illustrations flow with content */
+    height: auto;
+    margin-top: 2rem; /* Adjust margin */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem; /* Smaller gap between illustrations */
+    width: 100%; /* Ensure it takes full width */
+  }
+
+  .illustration,
+  .doodle {
+    position: static; /* Remove absolute positioning */
+    animation: none; /* Disable complex animations on small screens for performance/simplicity */
+    transform: none !important; /* Override any inline transforms from JS */
+    width: 100px; /* Smaller fixed size for mobile illustrations */
+    height: auto;
+    margin: 0.2rem; /* Smaller margin */
+  }
+
+  .pencil {
+    width: 150px; /* Smaller pencil on mobile */
+  }
+
+  .doodle {
+    width: 30px; /* Smaller doodles on mobile */
+  }
+
+  .games-heading {
+    font-size: 3rem;
+  }
+
+  .games-tagline {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .game-cards-grid {
+    grid-template-columns: 1fr; /* Single column on mobile */
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 300px) {
+  .navbar .logo {
+    font-size: 1.5rem;
+  }
+
+  .navbar nav ul li a {
+    font-size: 0.9rem;
+  }
+
+  .homepage-hero h1 {
+    font-size: 2.2rem;
+  }
+
+  .button {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
+
+  .games-heading {
+    font-size: 2.5rem;
+  }
+}
+
+/* Mobile: always show title overlay (no hover) */
+@media (max-width: 768px) {
+  .hover-blur .game-card-icon {
+    filter: none;
+    transform: none;
+  }
+
+  .hover-blur .game-card-title-overlay {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
