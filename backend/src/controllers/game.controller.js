@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Game } from "../models/game.model.js";
-import {uploadOnCloudinary} from "../utils/cloudinary.js";
+import {deleteFromCloudinary, deleteVideoFromCloudinary, uploadOnCloudinary} from "../utils/cloudinary.js";
 
 const getAllGames = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, searchQuery, tags, sortBy, sortType } = req.query;
@@ -135,8 +135,44 @@ const publishAGame = asyncHandler( async (req, res) => {
     )
 })
 
+const deleteAGame = asyncHandler( async (req, res) => {
+    const {gameId} = req.params;
+
+    if(!gameId) throw new ApiError(400, "Game id is required");
+
+    const game = await Game.findById(gameId);
+
+    if(!game) throw new ApiError(400, "No game found");
+    if(!game.owner.equals(req.user?._id)) throw new ApiError(401, "Unauthorized Action");
+    
+    const banner = game.banner;
+    const video = game.video;
+
+    const deletedGameResponse = await Game.deleteOne({ _id: game._id });
+
+    if(!deletedGameResponse.acknowledged) throw new ApiError(500, "Something went wrong while deleting the game");
+
+    if(video) {
+        const deletedVideoResponse = await deleteVideoFromCloudinary(video);
+        if(!deletedVideoResponse) console.log("Something went wrong while deleting the video from cloudinary");
+    }
+    const deletedBannerResponse = await deleteFromCloudinary(banner);
+    if(!deletedBannerResponse) console.log("Something went wrong while deleting the banner from cloudinary");
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            null,
+            "Game deleted successfully"
+        )
+    )
+})
+
 
 export {
     getAllGames,
-    publishAGame
+    publishAGame,
+    deleteAGame
 }

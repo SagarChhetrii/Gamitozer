@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { getAllGames, publishAGame } from "../controllers/game.controller.js";
+import { deleteAGame, getAllGames, publishAGame } from "../controllers/game.controller.js";
 import {verifyToken} from "../middlewares/auth.middleware.js";
 import {upload} from "../middlewares/multer.middleware.js"
 
@@ -23,5 +23,6 @@ router.route("/")
     ]),
     publishAGame
 )
+router.route("/delete/:gameId").get(verifyToken, deleteAGame);
 
 export default router;
