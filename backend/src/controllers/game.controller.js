@@ -196,11 +196,38 @@ const updateGameDetails = asyncHandler( async (req, res) => {
         const tagsArray = tags.split(","); 
         game.tags = [...new Set([...game.tags, ...tagsArray])];
     }
+    if(videoLocalPath) {
+        const video = await uploadOnCloudinary(videoLocalPath);
+        game.video = video.secure_url;
+    } else {
+        const videoUrl = game.video;
+        const deletedVideoResponse = await deleteVideoFromCloudinary(videoUrl);
+        if(!deletedVideoResponse) console.log("Something went wrong while deleting video from cloudinary");
+        
+        game.video = "";
+    }
+    if(bannerLocalPath) {
+        const banner = await uploadOnCloudinary(bannerLocalPath);
+        game.banner = banner.secure_url;
+    }
+
+    await game.save({validateBeforeSave: false});
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            game,
+            "Game details updated successfully"
+        )
+    )
 })
 
 
 export {
     getAllGames,
     publishAGame,
-    deleteAGame
+    deleteAGame,
+    updateGameDetails
 }
