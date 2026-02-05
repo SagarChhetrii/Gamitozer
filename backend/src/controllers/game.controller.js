@@ -170,6 +170,34 @@ const deleteAGame = asyncHandler( async (req, res) => {
     )
 })
 
+const updateGameDetails = asyncHandler( async (req, res) => {
+    const {gameId} = req.params;
+
+    if(!gameId) throw new ApiError(400, "Game id is required");
+
+    const {title, description, link, visibility = "public", tags} = req.body;
+    const videoLocalPath = req.files?.videoFile?.[0]?.path;
+    const bannerLocalPath = req.files?.bannerFile?.[0]?.path;
+
+    if(!title || !description || !link || !visibility || !tags || !videoLocalPath || !bannerLocalPath) {
+        throw new ApiError(400, "Atleast one field is required");
+    }
+
+    const game = await Game.findById(gameId);
+
+    if(!game) throw new ApiError(400, "No game found");
+    if(!game.owner.equals(req.user?._id)) throw new ApiError(401, "Unauthorized actions");
+
+    if(title) game.title = title;
+    if(description) game.description = description;
+    if(link) game.link = link;
+    if(visibility) game.visibility = visibility;
+    if(tags) {
+        const tagsArray = tags.split(","); 
+        game.tags = [...new Set([...game.tags, ...tagsArray])];
+    }
+})
+
 
 export {
     getAllGames,
