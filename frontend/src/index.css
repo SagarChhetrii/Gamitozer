@@ -111,16 +111,16 @@ a {
   width: 100%;
 }
 
-/* Homepage Hero Section */
+
 .homepage-hero {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center content vertically */
+  justify-content: center; 
   align-items: center;
   text-align: center;
-  padding: calc(var(--navbar-height) + 2rem) 5% 2rem; /* Dynamic top padding */
-  min-height: calc(100vh - var(--navbar-height)); /* Ensure it fits viewport minus navbar */
-  box-sizing: border-box; /* Include padding in height calculation */
+  padding: calc(var(--navbar-height) + 2rem) 5% 2rem; 
+  min-height: calc(100vh - var(--navbar-height)); 
+  box-sizing: border-box; 
   position: relative;
   overflow: hidden;
 }
