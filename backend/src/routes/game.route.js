@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { deleteAGame, getAllGames, publishAGame } from "../controllers/game.controller.js";
+import { deleteAGame, getAllGames, publishAGame, updateGameDetails } from "../controllers/game.controller.js";
 import {verifyToken} from "../middlewares/auth.middleware.js";
 import {upload} from "../middlewares/multer.middleware.js"
 
@@ -24,5 +24,20 @@ router.route("/")
     publishAGame
 )
 router.route("/delete/:gameId").get(verifyToken, deleteAGame);
+router.route("/update/:gameId").patch(
+    verifyToken,
+    upload.fields([
+        {
+            name: "videoFile",
+            maxCount: 1,
+            limits: {fileSize: 1024 * 1024 * 500}
+        },
+        {
+            name: "bannerFile",
+            maxCount: 1
+        }
+    ]),
+    updateGameDetails
+);
 
 export default router;

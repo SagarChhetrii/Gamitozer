@@ -92,10 +92,10 @@ const getAllGames = asyncHandler(async (req, res) => {
 })
 
 const publishAGame = asyncHandler( async (req, res) => {
-    const {title, description, link, visibility = "public", tags} = req.body;
+    const {title, description, link, visibility = "public", tags} = req.body || {};
 
-    if(!title.trim() || !link.trim()) throw new ApiError(400, "Required fields are needed");
-    let tagsArray = []
+    if(!title?.trim() || !link?.trim()) throw new ApiError(400, "Required fields are needed");
+    let tagsArray = [];
     if(tags) {
         tagsArray = tags.split(",");
     }
@@ -175,11 +175,12 @@ const updateGameDetails = asyncHandler( async (req, res) => {
 
     if(!gameId) throw new ApiError(400, "Game id is required");
 
-    const {title, description, link, visibility = "public", tags} = req.body;
+    const {title, description, link, tags} = req.body || {};
     const videoLocalPath = req.files?.videoFile?.[0]?.path;
     const bannerLocalPath = req.files?.bannerFile?.[0]?.path;
+    console.log([title, description, link, tags, videoLocalPath, bannerLocalPath].some((field) => field && field?.trim() !== ""))
 
-    if(!title || !description || !link || !visibility || !tags || !videoLocalPath || !bannerLocalPath) {
+    if([title, description, link, tags, videoLocalPath, bannerLocalPath].some((field) => field?.trim() !== "" && field)) {
         throw new ApiError(400, "Atleast one field is required");
     }
 
@@ -191,7 +192,6 @@ const updateGameDetails = asyncHandler( async (req, res) => {
     if(title) game.title = title;
     if(description) game.description = description;
     if(link) game.link = link;
-    if(visibility) game.visibility = visibility;
     if(tags) {
         const tagsArray = tags.split(","); 
         game.tags = [...new Set([...game.tags, ...tagsArray])];
