@@ -265,7 +265,7 @@ const getAGame = asyncHandler( async (req, res) => {
         }
     ]);
 
-    if(!game) throw new ApiError(400, "No game found");
+    if(!game[0]) throw new ApiError(400, "No game found");
 
     res
     .status(200)
