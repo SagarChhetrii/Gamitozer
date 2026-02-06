@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Game } from "../models/game.model.js";
 import {deleteFromCloudinary, deleteVideoFromCloudinary, uploadOnCloudinary} from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const getAllGames = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, searchQuery, tags, sortBy, sortType } = req.query;
@@ -178,9 +179,8 @@ const updateGameDetails = asyncHandler( async (req, res) => {
     const {title, description, link, tags} = req.body || {};
     const videoLocalPath = req.files?.videoFile?.[0]?.path;
     const bannerLocalPath = req.files?.bannerFile?.[0]?.path;
-    console.log([title, description, link, tags, videoLocalPath, bannerLocalPath].some((field) => field && field?.trim() !== ""))
 
-    if([title, description, link, tags, videoLocalPath, bannerLocalPath].some((field) => field?.trim() !== "" && field)) {
+    if(![title, description, link, tags, videoLocalPath, bannerLocalPath].some((field) => field?.trim() !== "" && field)) {
         throw new ApiError(400, "Atleast one field is required");
     }
 
@@ -198,6 +198,7 @@ const updateGameDetails = asyncHandler( async (req, res) => {
     }
     if(videoLocalPath) {
         const video = await uploadOnCloudinary(videoLocalPath);
+        if(!video) throw new ApiError(500, "Something went wrong while uploading the video");
         game.video = video.secure_url;
     } else {
         const videoUrl = game.video;
@@ -208,6 +209,7 @@ const updateGameDetails = asyncHandler( async (req, res) => {
     }
     if(bannerLocalPath) {
         const banner = await uploadOnCloudinary(bannerLocalPath);
+        if(!banner) throw new ApiError(500, "Something went wrong while uploading the banner");
         game.banner = banner.secure_url;
     }
 
@@ -224,10 +226,62 @@ const updateGameDetails = asyncHandler( async (req, res) => {
     )
 })
 
+const getAGame = asyncHandler( async (req, res) => {
+    const {gameId} = req.params;
+
+    if(!gameId) throw new ApiError(400, "Game id is required");
+
+    if (!mongoose.Types.ObjectId.isValid(gameId)) throw new ApiError(400, "Invalid game id");
+
+    const game = await Game.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(gameId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullname: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                owner: {
+                    $first: "$owner"
+                }
+            }
+        }
+    ]);
+
+    if(!game) throw new ApiError(400, "No game found");
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            game[0],
+            "Game fetched successfully"
+        )
+    )
+})
 
 export {
     getAllGames,
     publishAGame,
     deleteAGame,
-    updateGameDetails
+    updateGameDetails,
+    getAGame
 }
