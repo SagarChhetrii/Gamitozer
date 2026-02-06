@@ -13,7 +13,7 @@ router.route("/register").post(
 router.route("/login").post(userLogin);
 router.route("/logout").get(verifyToken, userLogout);
 router.route("/refresh-token").get(refreshAccessToken);
-router.route("/reset-password").patch(verifyToken, resetPassword);
+router.route("/reset-password").patch(resetPassword);
 router.route("/update/avatar").patch(
     verifyToken,
     upload.single("avatar"),
