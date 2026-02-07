@@ -278,10 +278,40 @@ const getAGame = asyncHandler( async (req, res) => {
     )
 })
 
+const toggleGameVisibility = asyncHandler( async (req, res) => {
+    const {gameId} = req.params;
+
+    if(!gameId) throw new ApiError(400, "Game id is required");
+
+    const {visibility} = req.body;
+
+    if(!visibility) throw new ApiError("Visibility field is required");
+
+    const game = await Game.findById(gameId);
+
+    if(!game) throw new ApiError(400, "Game not found");
+
+    if(!game.owner.equals(req.user?._id)) throw new ApiError(401, "Unauthorized action");
+
+    game.visibility = visibility;
+    await game.save({validateBeforeSave: false});
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            game,
+            "Visibility updated successfully"
+        )
+    )
+})
+
 export {
     getAllGames,
     publishAGame,
     deleteAGame,
     updateGameDetails,
-    getAGame
+    getAGame,
+    toggleGameVisibility
 }
