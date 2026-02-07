@@ -1,4 +1,5 @@
-import {Schema} from "mongoose";
+import mongoose, {Schema} from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const blogSchema = new Schema(
     {
@@ -14,9 +15,16 @@ const blogSchema = new Schema(
         game: {
             type: Schema.Types.ObjectId,
             ref: "Game"
+        },
+        image: {
+            type: String //Cloudinary URL
         }
     },
     {
         timestamps: true
     }
 )
+
+blogSchema.plugin(mongooseAggregatePaginate);
+
+export const Blog = mongoose.model("Blog", blogSchema);
