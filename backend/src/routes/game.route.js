@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { deleteAGame, getAGame, getAllGames, publishAGame, updateGameDetails } from "../controllers/game.controller.js";
+import { deleteAGame, getAGame, getAllGames, publishAGame, toggleGameVisibility, updateGameDetails } from "../controllers/game.controller.js";
 import {verifyToken} from "../middlewares/auth.middleware.js";
 import {upload} from "../middlewares/multer.middleware.js"
 
@@ -40,5 +40,6 @@ router.route("/update/:gameId").patch(
     ]),
     updateGameDetails
 );
+router.route("/visibility/:gameId").patch(verifyToken, toggleGameVisibility);
 
 export default router;
