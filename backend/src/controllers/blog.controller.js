@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js"; 
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const getAllBlogs = asyncHandler( async (req, res) => {
     const {page = 1, limit = 10} = req.query;
@@ -134,7 +135,6 @@ const updateABlog = asyncHandler( async (req, res) => {
 
     const {content, gameId} = req.body || {};
     const imageLocalPath = req.file?.path;
-    console.log(!content?.trim() && !gameId?.trim() && !imageLocalPath?.trim());
     
     if(!content?.trim() && !gameId?.trim() && !imageLocalPath?.trim()) throw new ApiError(400, "Atleast one field is required");
 
@@ -173,9 +173,79 @@ const updateABlog = asyncHandler( async (req, res) => {
     )
 })
 
+const getABlog = asyncHandler( async (req , res) => {
+    const {blogId} = req.params
+    if(!blogId) throw new ApiError(400, "Blog id is required");
+
+    const blog = await Blog.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(blogId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullname: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $lookup: {
+                from: "games",
+                localField: "game",
+                foreignField: "_id",
+                as: "game",
+                pipeline: [
+                    {
+                        $project: {
+                            title: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                owner: {
+                    $first: "$owner"
+                },
+                game: {
+                    $first: "$game"
+                }
+            }
+        }
+    ]);
+
+    console.log(blog);
+
+    if(!blog) throw new ApiError(400, "Blog not found");
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            blog[0],
+            "Blog fetched successfully"
+        )
+    )
+})
+
 export {
     getAllBlogs,
     publishABlog,
     deleteABlog,
-    updateABlog
+    updateABlog,
+    getABlog
 }

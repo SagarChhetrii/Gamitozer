@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteABlog, getAllBlogs, publishABlog, updateABlog } from "../controllers/blog.controller.js";
+import { deleteABlog, getABlog, getAllBlogs, publishABlog, updateABlog } from "../controllers/blog.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -13,11 +13,15 @@ router.route("/")
     upload.single("imageFile"),
     publishABlog
 );
+
 router.route("/delete/:blogId").delete(verifyToken, deleteABlog);
+
 router.route("/update/:blogId").patch(
     verifyToken,
     upload.single("imageFile"),
     updateABlog
-)
+);
+
+router.route("/:blogId").get(getABlog);
 
 export default router;
