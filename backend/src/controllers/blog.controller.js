@@ -2,7 +2,7 @@ import { Blog } from "../models/blog.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js"; 
 import { ApiError } from "../utils/ApiError.js"; 
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllBlogs = asyncHandler( async (req, res) => {
     const {page = 1, limit = 10} = req.query;
@@ -74,11 +74,11 @@ const getAllBlogs = asyncHandler( async (req, res) => {
 })
 
 const publishABlog = asyncHandler( async (req, res) => {
-    const {content, gameId} = req.body;
+    const {content, gameId} = req.body || {};
 
     if(!content) throw new ApiError(400, "Content is required");
 
-    const imageLocalPath = req.field[0]?.path;
+    const imageLocalPath = req.file?.path;
     let image;
     if(imageLocalPath) {
         image = await uploadOnCloudinary(imageLocalPath);
@@ -103,11 +103,11 @@ const publishABlog = asyncHandler( async (req, res) => {
 })
 
 const deleteABlog = asyncHandler( async (req, res) => {
-    const {gameId} = req.params;
+    const {blogId} = req.params;
 
-    if(gameId) throw new ApiError(400, "Game id is required");
+    if(!blogId) throw new ApiError(400, "Game id is required");
 
-    const blog = await Blog.findById(gameId);
+    const blog = await Blog.findById(blogId);
 
     if(!blog) throw new ApiError(400, "Blog not found");
     if(!blog.owner.equals(req.user?._id)) throw new ApiError(401, "Unauthorised action");
@@ -127,7 +127,55 @@ const deleteABlog = asyncHandler( async (req, res) => {
     )
 })
 
+const updateABlog = asyncHandler( async (req, res) => {
+    const {blogId} = req.params;
+
+    if(!blogId) throw new ApiError(400, "Blog id is required");
+
+    const {content, gameId} = req.body || {};
+    const imageLocalPath = req.file?.path;
+    console.log(!content?.trim() && !gameId?.trim() && !imageLocalPath?.trim());
+    
+    if(!content?.trim() && !gameId?.trim() && !imageLocalPath?.trim()) throw new ApiError(400, "Atleast one field is required");
+
+    const blog = await Blog.findById(blogId);
+
+    if(!blog) throw new ApiError(400, "Blog does not exist");
+    if(!blog.owner.equals(req.user?._id)) throw new ApiError(401, "Unauthorized action");
+
+    if(content) {
+        blog.content = content;
+    }
+    if(gameId) {
+        blog.game = gameId;
+    }
+    if(imageLocalPath) {
+        const oldImageUrl = blog.image;
+        
+        const image = await uploadOnCloudinary(imageLocalPath);
+        if(!image) throw new ApiError(500, "Something went wrong while uploading image on Cloudinary");
+
+        blog.image = image;
+        const imageDeletedResponse = await deleteFromCloudinary(oldImageUrl);
+        if(!imageDeletedResponse) console.log("Something went wrong with deleting image from cloudinary");
+    }
+
+    await blog.save({validateBeforeSave: false});
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            blog,
+            "Blog updated successfully"
+        )
+    )
+})
+
 export {
     getAllBlogs,
-    publishABlog
+    publishABlog,
+    deleteABlog,
+    updateABlog
 }
