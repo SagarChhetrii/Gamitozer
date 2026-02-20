@@ -93,7 +93,7 @@ const addGameComment = asyncHandler( async (req, res) => {
     )
 })
 
-const deleteGameComment = asyncHandler( async (req, res) => {
+const deleteComment = asyncHandler( async (req, res) => {
     const {commentId} = req.params;
 
     if(!commentId) throw new ApiError(400, "Game id is required");
@@ -118,9 +118,38 @@ const deleteGameComment = asyncHandler( async (req, res) => {
     )
 })
 
+const editComment = asyncHandler( async (req, res) => {
+    const {commentId} = req.params;
+
+    if(!commentId) throw new ApiError(400, "Comment id is required");
+
+    const {content} = req.body;
+
+    if(!content?.trim()) throw new ApiError(400, "Content is required");
+
+    const comment = await Comment.findById(commentId);
+
+    if(!comment) throw new ApiError(400, "Comment does not exist");
+    if(!comment.owner.equals(req.user?._id)) throw new ApiError(401, "Unauthorized action");
+
+    comment.content = content;
+    await comment.save({validateBeforeSave: false});
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            comment,
+            "Comment edited successfully"
+        )
+    )
+})
+
 
 export {
     getAllGameComments,
     addGameComment,
-    deleteGameComment
+    deleteComment,
+    editComment
 }

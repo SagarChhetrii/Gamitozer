@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addGameComment, deleteGameComment, getAllGameComments } from "../controllers/comment.controller.js";
+import { addGameComment, deleteComment, editComment, getAllGameComments } from "../controllers/comment.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 
@@ -10,6 +10,7 @@ router.route("/game/:gameId")
 .get(getAllGameComments)
 .post(verifyToken, addGameComment);
 
-router.route("/game/delete/:commentId").delete(verifyToken ,deleteGameComment);
+router.route("/delete/:commentId").delete(verifyToken, deleteComment);
+router.route("/edit/:commentId").patch(verifyToken, editComment);
 
 export default router;
