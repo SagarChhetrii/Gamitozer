@@ -6,7 +6,7 @@ import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js
 import mongoose from "mongoose";
 
 const getAllBlogs = asyncHandler( async (req, res) => {
-    const {page = 1, limit = 10} = req.query;
+    const {page = 1, limit = 10, searchQuery} = req.query;
 
     const pipeline = [
         {
@@ -52,6 +52,19 @@ const getAllBlogs = asyncHandler( async (req, res) => {
             }
         }
     ];
+
+    if(searchQuery) {
+        pipeline.push(
+            {
+                $match: {
+                    "owner.fullname": {
+                        $regex: searchQuery,
+                        $options: "i"
+                    }
+                }
+            }
+        )
+    }
 
     const paginateOptions = {
         page,
