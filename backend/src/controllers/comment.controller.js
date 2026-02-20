@@ -181,6 +181,94 @@ const addBlogComment = asyncHandler( async (req, res) => {
     )
 })
 
+const getAllCommentComments = asyncHandler( async (req, res) => {
+    const {commentId} = req.params;
+    if(!commentId?.trim()) throw new ApiError(400, "Blog id is required");
+
+    const {page = 1, limit = 20} = req.query;
+
+    const pipeline = [
+        {
+            $match: {
+                comment: new mongoose.Types.ObjectId(commentId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullname: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                owner: {
+                    $first: "$owner"
+                }
+            }
+        }
+    ];
+
+    const paginateOptions = {
+        page,
+        limit,
+        customLabels: {
+            docs: "comments",
+            totalDocs: "totalComments"
+        }
+    };
+
+    const allComments = await Comment.aggregatePaginate(Comment.aggregate(pipeline), paginateOptions);
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            allComments,
+            "Blog comments fetched successfully"
+        )
+    )
+})
+
+const addCommentComment = asyncHandler( async (req, res) => {
+    const {commentId} = req.params;
+
+    if(!commentId?.trim()) throw new ApiError(400, "Comment id is required");
+
+    const {content} = req.body;
+
+    if(!content?.trim()) throw new ApiError("Content is required");
+
+    const addedComment = await Comment.create({
+        content,
+        owner: req.user?._id,
+        comment: commentId
+    })
+
+    if(!addedComment) throw new ApiError(500, "Something went wrong while adding comment");
+
+    res
+    .status(201)
+    .json(
+        new ApiResponse(
+            201,
+            addedComment,
+            "Comment added successfully"
+        )
+    )
+})
+
 const deleteComment = asyncHandler( async (req, res) => {
     const {commentId} = req.params;
 
@@ -240,6 +328,8 @@ export {
     addGameComment,
     getAllBlogComments,
     addBlogComment,
+    getAllCommentComments,
+    addCommentComment,
     deleteComment,
     editComment
 }
