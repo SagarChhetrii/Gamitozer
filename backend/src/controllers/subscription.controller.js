@@ -1,13 +1,14 @@
-import { Subscription } from "../models/subscription.model";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { Subscription } from "../models/subscription.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const toggleSubscription = asyncHandler( async (req, res) => {
-    const {developerId} = req.body;
+    const {developerId} = req.params;
 
     if(!developerId?.trim()) throw new ApiError(400, "Developer id is required");
 
-    let subscribed = await Subscription.find({
+    let subscribed = await Subscription.findOne({
         follower: req.user?._id,
         developer: developerId
     })
@@ -30,8 +31,14 @@ const toggleSubscription = asyncHandler( async (req, res) => {
     res
     .status(201)
     .json(
-        201,
-        subscribed,
-        "Subscription toggled successfully"
+        new ApiResponse(
+            201,
+            subscribed,
+            "Subscription toggled successfully"
+        )
     )
 })
+
+export {
+    toggleSubscription
+}
