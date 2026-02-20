@@ -75,8 +75,45 @@ const toggleBlogLike = asyncHandler( async (req, res) => {
     )
 })
 
+const toggleCommentLike = asyncHandler( async (req, res) => {
+    const {commentId} = req.params;
+
+    if(!commentId?.trim()) throw new ApiError(400, "Comment id is required");
+
+    let likedComment = await Like.findOne({
+        comment: commentId,
+        likedBy: req.user?._id
+    });
+
+    if(likedComment) {
+        const unLikeResponse = await Like.deleteOne({
+            comment: commentId,
+            likedBy: req.user?._id
+        })
+
+        if(!unLikeResponse.acknowledged) throw new ApiError(500, "Something went wrong while toggling like");
+        likedComment = null;
+    } else {
+        likedComment =  await Like.create({
+            comment: commentId,
+            likedBy: req.user?._id
+        })
+    }
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            201,
+            likedComment,
+            "Game like toggled successfully"
+        )
+    )
+})
+
 
 export {
     toggleGameLike,
-    toggleBlogLike
+    toggleBlogLike,
+    toggleCommentLike
 }
