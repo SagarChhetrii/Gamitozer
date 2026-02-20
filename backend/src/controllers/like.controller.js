@@ -111,9 +111,116 @@ const toggleCommentLike = asyncHandler( async (req, res) => {
     )
 })
 
+const getLikedGames = asyncHandler( async (req, res) => {
+    const {page = 1, limit = 10, searchQuery} = req.query;
+
+    const pipeline = [
+        {
+            $match: {
+                likedBy: req.user?._id,
+                game: {
+                    $exists: true,
+                    $type: "objectId"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "games",
+                localField: "game",
+                foreignField: "_id",
+                as: "likedGames",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        username: 1,
+                                        fullname: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }
+                    },
+                    {
+                        $project: {
+                            title: 1,
+                            banner: 1,
+                            tags: 1,
+                            owner: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                likedGames: {
+                    $first: "$likedGames"
+                }
+            }
+        },
+        {
+            $replaceRoot: {
+                newRoot: "$likedGames"
+            }
+        }
+    ];
+
+    if(searchQuery) {
+        pipeline.push(
+            {
+                $match: {
+                    "likedGames.title": {
+                        $regex: searchQuery,
+                        $options: "i"
+                    }
+                }
+            }
+        )
+    }
+
+    const paginateOptions = {
+        page,
+        limit,
+        customLabels: {
+            docs: "likedGames",
+            totalDocs: "totalLikedGames"
+        }
+    }
+
+    const likedGames = await Like.aggregatePaginate(Like.aggregate(pipeline), paginateOptions);
+
+    console.log(likedGames)
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            likedGames,
+            "Liked games fetched successfully"
+        )
+    )
+})
+
 
 export {
     toggleGameLike,
     toggleBlogLike,
-    toggleCommentLike
+    toggleCommentLike,
+    getLikedGames
 }
