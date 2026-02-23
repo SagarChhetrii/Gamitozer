@@ -78,11 +78,6 @@ const getUserFollowers = asyncHandler( async ( req, res) => {
             }
         },
         {
-            $project: {
-                follower: 1
-            }
-        },
-        {
             $replaceRoot:{
                 newRoot: "$follower"
             }
@@ -111,7 +106,74 @@ const getUserFollowers = asyncHandler( async ( req, res) => {
     )
 })
 
+const getUserFollowings = asyncHandler( async ( req, res) => {
+    const {userId} = req.params;
+
+    if(!userId?.trim()) throw new ApiError(400, "User id is needed");
+
+    const {page = 1, limit = 10} = req.query;
+
+    const pipeline = [
+        {
+            $match: {
+                follower: new mongoose.Types.ObjectId(userId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "developer",
+                foreignField: "_id",
+                as: "following",
+                pipeline: [
+                    {
+                        $project: {
+                            username: 1,
+                            fullname: 1,
+                            avatar: 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                following: {
+                    $first: "$following"
+                }
+            }
+        },
+        {
+            $replaceRoot:{
+                newRoot: "$following"
+            }
+        }
+    ]
+
+    const paginateOptions = {
+        page,
+        limit,
+        customLabels: {
+            docs: "followings",
+            totalDocs: "totalFollowings"
+        }
+    }
+
+    const followings = await Subscription.aggregatePaginate(Subscription.aggregate(pipeline), paginateOptions);
+
+    res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            followings,
+            "Followers fetched successfully"
+        )
+    )
+})
+
 export {
     toggleSubscription,
-    getUserFollowers
+    getUserFollowers,
+    getUserFollowings
 }
