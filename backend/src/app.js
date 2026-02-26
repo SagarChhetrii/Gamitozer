@@ -28,6 +28,7 @@ import blogRoutes from "./routes/blog.route.js";
 import commentRoutes from "./routes/comment.route.js";
 import likeRoutes from "./routes/like.route.js";
 import subscriptionRoutes from "./routes/subscription.route.js";
+import collectionRoutes from "./routes/collection.route.js";
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/admin/users", adminUserRoutes);
@@ -36,5 +37,6 @@ app.use("/api/v1/blogs", blogRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/subscriptions", subscriptionRoutes);
+app.use("/api/v1/collections", collectionRoutes);
 
 export default app;
